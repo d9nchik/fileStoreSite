@@ -1,35 +1,47 @@
+from time import time
+
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponseRedirect, FileResponse, HttpResponse
 from django.shortcuts import render
-from myfiles.models import File
+
 from myfiles.form import UploadFileForm
-from hashlib import sha3_256
-from django.core.files.base import ContentFile
+from myfiles.models import File
 
 
 # Create your views here.
 def upload_file(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/login')
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            m = sha3_256()
+            # m = sha3_256()
             file_ = request.FILES['file']
-            instance = File(path=file_, name=request.POST['name'])
-            instance.path.open()
-            m.update(instance.path.read())
-            instance.unique = m.hexdigest()
+            id = get_id(5)
+            instance = File(path=file_, name=request.POST['name'], unique=id)
+            # instance.path.open()
+            # m.update(instance.path.read())
+            # instance.id = m.hexdigest()
             instance.save()
-            return HttpResponseRedirect('/success/url/')
+            return HttpResponseRedirect('/success/url/{}'.format(id))
     else:
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
 
 
-def get_file(request):
-    if request.method == 'GET' and 'id' in request.GET:
-        id = request.GET['id']
-        try:
-            file = File.objects.get(unique=id).path  # get the string you want to return.
-            return FileResponse(file)
-        except File.DoesNotExist:
-            pass
-    return HttpResponse(f'<h1>What are you looking here)</h1>')
+def get_id(number_of_symbols: int) -> str:
+    return hex(int(time() % (16 ** number_of_symbols)))[2:]
+
+
+def get_file(request, file_unique):
+    print(file_unique)
+    try:
+        file = File.objects.get(unique=file_unique).path  # get the string you want to return.
+        return FileResponse(file)
+    except File.DoesNotExist:
+        return HttpResponse(f'<h1>What are you looking here)</h1>')
+
+
+class MyLoginView(LoginView):
+    redirect_authenticated_user = True
+    template_name = 'login.html'

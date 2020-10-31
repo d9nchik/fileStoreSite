@@ -4,4 +4,4 @@ from django.db import models
 class File(models.Model):
     name = models.CharField(max_length=64, null=True)
     path = models.FileField(upload_to='files')
-    unique = models.CharField(max_length=256)
+    unique = models.CharField(max_length=5)
