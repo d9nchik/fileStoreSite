@@ -1,3 +1,4 @@
+from hashlib import sha3_256
 from time import time
 
 from django.contrib.auth.views import LoginView
@@ -15,18 +16,23 @@ def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            # m = sha3_256()
             file_ = request.FILES['file']
             id = get_id(5)
             instance = File(path=file_, name=request.POST['name'], unique=id)
-            # instance.path.open()
-            # m.update(instance.path.read())
-            # instance.id = m.hexdigest()
+            hashName(instance.path)
             instance.save()
-            return HttpResponseRedirect('/success/url/{}'.format(id))
+            return HttpResponseRedirect('/{}'.format(id))
     else:
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
+
+
+def hashName(file_field):
+    m = sha3_256()
+    file_field.open()  # make sure we're at the beginning of the file
+    m.update(file_field.read())
+    ext = file_field.name.split('.')[-1]
+    file_field.name = m.hexdigest() + '.' + ext
 
 
 def get_id(number_of_symbols: int) -> str:
@@ -34,10 +40,11 @@ def get_id(number_of_symbols: int) -> str:
 
 
 def get_file(request, file_unique):
-    print(file_unique)
     try:
-        file = File.objects.get(unique=file_unique).path  # get the string you want to return.
-        return FileResponse(file)
+        object = File.objects.get(unique=file_unique)
+        file = object.path  # get the string you want to return.
+        response = FileResponse(file, filename=object.name + '.' + file.name.split('.')[-1])
+        return response
     except File.DoesNotExist:
         return HttpResponse(f'<h1>What are you looking here)</h1>')
 

@@ -22,8 +22,8 @@ from myfiles.views import upload_file, get_file, MyLoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('upload/', upload_file),
-    re_path('(?P<file_unique>[\\da-f]{5})/?', get_file),
     path('login', MyLoginView.as_view()),
-    path('logout', LogoutView.as_view())
+    path('logout', LogoutView.as_view()),
+    re_path('(?P<file_unique>[\\da-f]{5})/?', get_file),
     #     User.objects.create_user(username='usual_user', email='user@example.com', password='NotSecRetAtAll')
 ]
