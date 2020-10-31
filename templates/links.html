@@ -1,0 +1,6 @@
+<ol>
+    {% for link in links %}
+        <li>
+            <a href="/{{ link.unique }}">{{ link.name }}</a> at {{ link.date_of_upload }}</li>
+    {% endfor %}
+</ol>

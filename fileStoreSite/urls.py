@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import path, re_path
 
-from myfiles.views import upload_file, get_file, MyLoginView
+from myfiles.views import upload_file, get_file, MyLoginView, get_links
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('upload/', upload_file),
+    path('links/', get_links),
     path('login', MyLoginView.as_view()),
     path('logout', LogoutView.as_view()),
     re_path('(?P<file_unique>[\\da-f]{5})/?', get_file),

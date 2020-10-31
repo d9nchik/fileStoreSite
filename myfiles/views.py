@@ -21,7 +21,7 @@ def upload_file(request):
             instance = File(path=file_, name=request.POST['name'], unique=id)
             hashName(instance.path)
             instance.save()
-            return HttpResponseRedirect('/{}'.format(id))
+            return HttpResponseRedirect('/links'.format(id))
     else:
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
@@ -52,3 +52,13 @@ def get_file(request, file_unique):
 class MyLoginView(LoginView):
     redirect_authenticated_user = True
     template_name = 'login.html'
+
+
+def get_links(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/login')
+    try:
+        links = File.objects.order_by('-date_of_upload')
+        return render(request, 'links.html', {'links': links})
+    except File.DoesNotExist:
+        return HttpResponse(f'<h1>Oops. Contact master</h1>')
